@@ -1,0 +1,20 @@
+﻿name: CatSeedTrade
+main: cc.baka9.catseedtrade.CatSeedTrade
+version: 1.0.0
+api-version: 1.13
+softdepend: [Multiverse-Core,Vault]
+commands:
+  trade:
+    usage:
+      |
+      §a/<command> create §b<工会名> §c创建工会
+      §a/<command> info §b<工会名> §c查看指定公会详情
+      §a/<command> player §b<玩家名> §c查看这个玩家所在的公会详情
+      §a/<command> kick §b<玩家名> §c将玩家从工会踢出
+      §a/<command> join §b<工会名> §c请求进入工会
+      §a/<command> leave §b<工会名> §c离开工会
+      §a/<command> disable §c解散自己的工会
+      §a/<command> accept §b<玩家名> §c同意玩家进入工会
+      §a/<command> deny §b<玩家名> §c拒绝玩家进入工会
+      §a/<command> tops <页数> §c查看工会排行
+      §a/<command> bio <介绍> §c设置工会的介绍标语
