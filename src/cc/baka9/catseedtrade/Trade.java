@@ -39,8 +39,13 @@ public class Trade {
     }
 
     public double calcCurrentMaxExp(){
+        return getLevelExp(this.level - 1) + getLevelExp(this.level);
+    }
+
+    private double getLevelExp(int level){
         return (Math.pow(level - 1, 3) + 60) / 5 * ((level - 1) * 2 + 60);
     }
+
 
     public String getName(){
         return name;

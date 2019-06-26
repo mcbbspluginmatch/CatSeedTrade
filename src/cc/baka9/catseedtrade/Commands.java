@@ -28,13 +28,12 @@ public class Commands implements CommandExecutor {
                                     player.sendMessage("§e创建公会游戏币不足,需要游戏币" + Config.createTradeMoney);
                                     return true;
                                 }
+
+                                Trade trade = TradeHelper.createTrade(tradeName, pName);
                                 EconomyResponse er = CatSeedTrade.getEconomy().withdrawPlayer(player, Config.createTradeMoney);
                                 if (er.transactionSuccess()) {
-
-                                    Trade trade = TradeHelper.createTrade(tradeName, pName);
                                     player.sendMessage("§e消费了" + Config.createTradeMoney + "已经成功创建工会" + tradeName);
                                     Storage.saveOne(trade);
-
                                 }
                             } else {
                                 player.sendMessage("§e工会名字不能过长");
