@@ -35,7 +35,7 @@ class Listeners implements Listener {
                     Map<String, Double> member = trade.getMember();
                     String playerName = player.getName();
                     member.put(playerName, member.get(playerName) + exp);
-                    if (trade.calcCurrentExp() >= trade.calcCurrentMaxExp()) {
+                    while (trade.calcCurrentExp() >= trade.calcCurrentMaxExp()) {
                         TradeHelper.tradeUpgrade(trade);
                         member.keySet().forEach(name -> Notice.sendPlayerNotice(name, "§e工会 " + trade.getName() + " 等级已提升,现在等级 " + trade.getLevel()));
                     }
@@ -54,7 +54,7 @@ class Listeners implements Listener {
             Map<String, Double> member = trade.getMember();
             String playerName = player.getName();
             member.put(playerName, member.get(playerName) + 1);
-            if (trade.calcCurrentExp() >= trade.calcCurrentMaxExp()) {
+            while (trade.calcCurrentExp() >= trade.calcCurrentMaxExp()) {
                 TradeHelper.tradeUpgrade(trade);
                 member.keySet().forEach(name -> Notice.sendPlayerNotice(name, "§e工会 " + trade.getName() + " 等级已提升,现在等级 " + trade.getLevel()));
             }

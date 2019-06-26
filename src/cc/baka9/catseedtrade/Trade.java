@@ -39,7 +39,7 @@ public class Trade {
     }
 
     public double calcCurrentMaxExp(){
-        return 100 * Math.pow(2, this.level - 1);
+        return (Math.pow(level - 1, 3) + 60) / 5 * ((level - 1) * 2 + 60);
     }
 
     public String getName(){
