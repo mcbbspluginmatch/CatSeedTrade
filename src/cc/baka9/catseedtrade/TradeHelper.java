@@ -21,6 +21,7 @@ public class TradeHelper {
      */
     public static void tradeUpgrade(Trade trade){
         trade.setLevel(trade.getLevel() + 1);
+        trade.setExp(0);
     }
 
     /**
@@ -115,7 +116,7 @@ public class TradeHelper {
         if (!trade.getRequest().contains(playerName)) {
             throw new NotRequestException(trade.getName() + " 工会没有 " + playerName + " 的加入请求");
         }
-        list.forEach(t->t.getRequest().remove(playerName));
+        list.forEach(t -> t.getRequest().remove(playerName));
         TradeHelper.addTradeMember(trade, playerName);
     }
 
@@ -170,7 +171,7 @@ public class TradeHelper {
 
             }
         }
-        Trade trade = new Trade(tradeName, "还没有任何介绍~", playerName, Collections.singletonMap(playerName, 0.0), 0, new HashSet<>());
+        Trade trade = new Trade(tradeName, "还没有任何介绍~", playerName, Collections.singletonMap(playerName, 0.0), 0, new HashSet<>(), 0);
         list.add(trade);
         return trade;
     }
@@ -197,7 +198,7 @@ public class TradeHelper {
 
     public static List<Trade> getTopTrades() throws ArrayIndexOutOfBoundsException{
         List<Trade> tradeList = new ArrayList<>(TradeHelper.getList());
-        tradeList.sort(Comparator.comparing(Trade::getLevel).reversed().thenComparing(Comparator.comparing(Trade::calcCurrentExp).reversed()));
+        tradeList.sort(Comparator.comparing(Trade::getLevel).reversed().thenComparing(Comparator.comparing(Trade::getExp).reversed()));
         return tradeList;
     }
 
@@ -214,13 +215,19 @@ public class TradeHelper {
             if (entry.getKey().equalsIgnoreCase(trade.getOwner())) continue;
             showText.append("§b").append(entry.getKey()).append(" §a贡献- ").append(entry.getValue()).append("\n");
         }
-        TextComponent tc = new TextComponent("§l#" + (TradeHelper.getTopTrades().indexOf(trade) + 1) + " §6" + trade.getName() + "§9(§c等级 " + trade.getLevel() + " §e经验 " + trade.calcCurrentExp() + " / " + trade.calcCurrentMaxExp() + "§9)");
+        TextComponent tc = new TextComponent("§l#" + (TradeHelper.getTopTrades().indexOf(trade) + 1) + " §6" + trade.getName() + "§9(§c等级 " + trade.getLevel() + " §e经验 " + trade.getExp() + " / " + trade.calcCurrentMaxExp() + "§9)");
         tc.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("§7" + showText.toString().replace("&", "§")).create()));
         return tc;
     }
 
     public static void editBio(Trade trade, String bio){
         trade.setBio(bio);
+    }
+
+    public static void addMemberDedicate(Trade trade, Player p, double val){
+        Map<String, Double> member = trade.getMember();
+        String playerName = p.getName();
+        member.computeIfPresent(playerName, (k, v) -> Utils.twoDecimal(v + val));
     }
 
 

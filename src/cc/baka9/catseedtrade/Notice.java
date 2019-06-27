@@ -49,6 +49,10 @@ public class Notice {
         }
     }
 
+    public static void sendTradeMemberNotice(Trade trade, String noticeMessage){
+        trade.getMember().keySet().forEach(name -> Notice.sendPlayerNotice(name, noticeMessage));
+    }
+
     private static void requestStart(){
         scheduler.runTaskTimerAsynchronously(catSeedTrade, () -> TradeHelper.getList().forEach(trade -> {
             Set<String> request = trade.getRequest();

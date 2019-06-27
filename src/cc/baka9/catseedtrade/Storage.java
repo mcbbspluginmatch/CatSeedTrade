@@ -29,6 +29,7 @@ public class Storage {
             configuration.set("member", trade.getMember());
             configuration.set("level", trade.getLevel());
             configuration.set("request", new ArrayList<>(trade.getRequest()));
+            configuration.set("exp",trade.getExp());
             configuration.save(file);
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,7 +56,7 @@ public class Storage {
             Map<String, Double> member = new HashMap<>();
             conf.getConfigurationSection("member").getKeys(false).forEach(playerName -> member.put(playerName, conf.getDouble("member." + playerName)));
             Trade trade = new Trade(conf.getString("name"), conf.getString("bio"), conf.getString("owner"),
-                    member, conf.getInt("level"), new HashSet<>(conf.getStringList("request")));
+                    member, conf.getInt("level"), new HashSet<>(conf.getStringList("request")),conf.getDouble("exp"));
             list.add(trade);
 
         }

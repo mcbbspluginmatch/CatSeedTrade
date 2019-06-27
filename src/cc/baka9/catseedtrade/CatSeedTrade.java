@@ -15,8 +15,8 @@ public class CatSeedTrade extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new Listeners(), this);
         getServer().getPluginCommand("trade").setExecutor(new Commands());
-        Storage.load();
         Config.load();
+        Storage.load();
         Notice.start();
 
     }

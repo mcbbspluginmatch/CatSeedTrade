@@ -1,9 +1,6 @@
 package cc.baka9.catseedtrade;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class Trade {
 
@@ -13,15 +10,26 @@ public class Trade {
     private Map<String, Double> member;
     private int level;
     private Set<String> request;
+    private double exp;
 
-    public Trade(String name, String bio, String owner, Map<String, Double> member, int level, Set<String> request){
+    public Trade(String name, String bio, String owner, Map<String, Double> member, int level, Set<String> request, double exp){
         this.name = name;
         this.bio = bio;
         this.owner = owner;
         this.member = new HashMap<>(member);
         this.level = level;
         this.request = request;
+        this.exp = exp;
     }
+
+    public double getExp(){
+        return Utils.twoDecimal(exp);
+    }
+
+    public void setExp(double exp){
+        this.exp = exp;
+    }
+
 
     public Set<String> getRequest(){
         return request;
@@ -31,19 +39,10 @@ public class Trade {
         return 2 + this.level;
     }
 
-    public double calcCurrentExp(){
-        double currentExp = 0;
-        for (double exp : member.values())
-            currentExp = currentExp + exp;
-        return currentExp;
-    }
-
     public double calcCurrentMaxExp(){
-        return getLevelExp(this.level - 1) + getLevelExp(this.level);
-    }
+        Config.maxLevelEquationParser.setVariable("level", level);
+        return Utils.twoDecimal(Config.maxLevelEquationParser.getValue());
 
-    private double getLevelExp(int level){
-        return (Math.pow(level - 1, 3) + 60) / 5 * ((level - 1) * 2 + 60);
     }
 
 

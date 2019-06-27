@@ -9,8 +9,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import java.util.Map;
-
 class Listeners implements Listener {
 
     @EventHandler
@@ -32,12 +30,11 @@ class Listeners implements Listener {
                 double maxHealth = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();
                 double exp = maxHealth / 20;
                 if (exp > 0.1) {
-                    Map<String, Double> member = trade.getMember();
-                    String playerName = player.getName();
-                    member.put(playerName, member.get(playerName) + exp);
-                    while (trade.calcCurrentExp() >= trade.calcCurrentMaxExp()) {
+                    TradeHelper.addMemberDedicate(trade, player, exp);
+                    trade.setExp(trade.getExp() + exp);
+                    while (trade.getExp() >= trade.calcCurrentMaxExp()) {
                         TradeHelper.tradeUpgrade(trade);
-                        member.keySet().forEach(name -> Notice.sendPlayerNotice(name, "§e工会 " + trade.getName() + " 等级已提升,现在等级 " + trade.getLevel()));
+                        Notice.sendTradeMemberNotice(trade, "§e工会 " + trade.getName() + " 等级已提升,现在等级 " + trade.getLevel());
                     }
                 }
 
@@ -48,15 +45,15 @@ class Listeners implements Listener {
 
     @EventHandler
     public void onBreakBlock(BlockBreakEvent event){
+        if (event.isCancelled()) return;
         Player player = event.getPlayer();
         Trade trade = TradeHelper.getPlayerEnterTrade(player);
         if (trade != null) {
-            Map<String, Double> member = trade.getMember();
-            String playerName = player.getName();
-            member.put(playerName, member.get(playerName) + 1);
-            while (trade.calcCurrentExp() >= trade.calcCurrentMaxExp()) {
+            TradeHelper.addMemberDedicate(trade, player, 1);
+            trade.setExp(trade.getExp() + 1);
+            while (trade.getExp() >= trade.calcCurrentMaxExp()) {
                 TradeHelper.tradeUpgrade(trade);
-                member.keySet().forEach(name -> Notice.sendPlayerNotice(name, "§e工会 " + trade.getName() + " 等级已提升,现在等级 " + trade.getLevel()));
+                Notice.sendTradeMemberNotice(trade, "§e工会 " + trade.getName() + " 等级已提升,现在等级 " + trade.getLevel());
             }
         }
 

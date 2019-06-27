@@ -1,30 +1,25 @@
 package cc.baka9.catseedtrade;
 
 
-import java.util.Arrays;
-import java.util.List;
+import cc.baka9.catseedtrade.jfep.Parser;
+
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Test {
-    static String s = "sf";
-    static {
-        System.out.println("staticBlock");
-        System.out.println(s);
-    }
+    //保留两位
+    private static DecimalFormat doubleDf = new DecimalFormat("0.00");
+    static Map<String, Double> member = new HashMap<>();
+
     public static void main(String[] args){
-        test2();
+       String s = "((level - 1) ^ 3 + 60) / 5 * ((level - 1) * 2 + 60)";
+        Parser parser = new Parser(s);
+        for (int i = 0; i <= 3; i++) {
+            parser.setVariable("level", i);
+            System.out.println(doubleDf.format(parser.getValue()));
+
+        }
     }
 
-    static void test2(){
-        System.out.println(getList().subList(0, 1));
-        System.out.println(getList().subList(5, getList().size()));
-    }
-
-    static List<Object> getList(){
-        return Arrays.asList("1", "2", "3", "4", "5", "6");
-    }
-
-    static void test(){
-        int lv = 0;
-        System.out.println(100 * Math.pow(2, lv - 1));
-    }
 }
