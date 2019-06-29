@@ -58,7 +58,7 @@ public class Notice {
             Set<String> request = trade.getRequest();
             if (request.size() > 0) {
                 Player player = Bukkit.getPlayer(trade.getOwner());
-                if (player != null && player.isOnline() && player.getName().equals(trade.getOwner())) {
+                if (player != null && player.isOnline() && player.getName().equalsIgnoreCase(trade.getOwner())) {
                     request.forEach(name -> player.sendMessage("§e玩家" + name + "请求加入你的工会"));
                     player.sendMessage("§3输入 /trade accept 同意 或 /trade deny 拒绝");
 
@@ -79,7 +79,7 @@ public class Notice {
                         String playerName = player.getName();
                         if (names.size() > 0 && names.contains(playerName)) {
                             Player taskPlayer = Bukkit.getPlayer(playerName);
-                            if (taskPlayer != null && taskPlayer.isOnline() && taskPlayer.getName().equals(playerName)) {
+                            if (taskPlayer != null && taskPlayer.isOnline() && taskPlayer.getName().equalsIgnoreCase(playerName)) {
                                 conf.getStringList(playerName).forEach(player::sendMessage);
                                 conf.set(playerName, null);
                             }

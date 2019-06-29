@@ -3,12 +3,17 @@ package cc.baka9.catseedtrade;
 import cc.baka9.catseedtrade.exception.*;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.EconomyResponse;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class Commands implements CommandExecutor {
 
@@ -65,17 +70,11 @@ public class Commands implements CommandExecutor {
                     return true;
                 case "player":
                     if (args.length > 1) {
-                        Player targetPlayer = Bukkit.getPlayer(args[1]);
-                        if (targetPlayer == null || !targetPlayer.isOnline()) {
-                            player.sendMessage("§e你查询的指定玩家不存在");
+                        Trade trade = TradeHelper.getPlayerEnterTrade(args[1]);
+                        if (trade == null) {
+                            player.sendMessage("§e你查询的指定玩家没有加入任何公会");
                         } else {
-                            Trade trade = TradeHelper.getPlayerEnterTrade(targetPlayer);
-                            if (trade == null) {
-                                player.sendMessage("§e你查询的指定玩家没有加入任何公会");
-                            } else {
-                                player.spigot().sendMessage(TradeHelper.getTradeTextComponent(trade));
-                            }
-
+                            player.spigot().sendMessage(TradeHelper.getTradeTextComponent(trade));
                         }
                         return true;
                     }
@@ -114,8 +113,6 @@ public class Commands implements CommandExecutor {
                                 Storage.saveOne(leaveTrade);
                             } catch (TradeNotHaveThisPlayerException e) {
                                 player.sendMessage("§e你不在 " + args[1] + " 工会里面");
-                            } catch (PlayerNotHaveTradeException e) {
-                                player.sendMessage("§e你没有加入任何工会");
                             } catch (TradeOwnerException e) {
                                 player.sendMessage("§e你是工会的主人,无法退出工会");
                             }
@@ -130,7 +127,7 @@ public class Commands implements CommandExecutor {
                         disableTrade.getMember().keySet().forEach(member
                                 -> Notice.sendPlayerNotice(member, "§e玩家" + pName + " 解散了 " + disableTrade.getName() + " 工会"));
                         Storage.delOne(disableTrade);
-                    } catch (PlayerNotHaveTradeException e) {
+                    } catch (PlayerNotJoinTradeException e) {
                         player.sendMessage("§e你没有加入任何工会");
                     } catch (TradeOwnerNotThisPlayerException e) {
                         player.sendMessage("§e你不是这个工会的主人,不能擅自解散");
@@ -220,7 +217,7 @@ public class Commands implements CommandExecutor {
                                 player.sendMessage("§e你从工会里踢出了 " + args[1]);
                                 Notice.sendPlayerNotice(args[1], "§e玩家" + pName + "将你从工会" + trade.getName() + "踢出");
                                 Storage.saveOne(trade);
-                            } catch (TradeNotHaveThisPlayerException | PlayerNotHaveTradeException e) {
+                            } catch (TradeNotHaveThisPlayerException e) {
                                 player.sendMessage("§e玩家 " + args[1] + " 不在你的工会里");
                             } catch (TradeOwnerException e) {
                                 player.sendMessage("§e你无法踢出自己");
@@ -250,8 +247,133 @@ public class Commands implements CommandExecutor {
 
         }
         sender.sendMessage("§e创建工会需要 " + Config.createTradeMoney + " 游戏币");
+
+        if (sender instanceof Player) {
+            sendHelp((Player) sender);
+            return true;
+        }
+
         return false;
     }
 
+    private void sendHelp(Player player){
+        Trade trade = TradeHelper.getPlayerEnterTrade(player);
+        if (trade == null) {
+            sendNotJoinHelp(player);
+        } else if (trade.getOwner().equals(player.getName())) {
+            sendOwnerHelp(player);
+        } else {
+            sendJoinedHelp(player);
+        }
 
+
+    }
+
+    private void sendJoinedHelp(CommandSender sender){
+        String sb = "§a/Trade info §b<工会名> §c查看指定公会详情\n" +
+                "§a/Trade player §b<玩家名> §c查看这个玩家所在的公会详情\n" +
+                "§4/Trade leave <工会名> 离开工会\n" +
+                "§a/Trade tops <页数> §c查看工会排行";
+        sender.sendMessage(sb);
+    }
+
+    private void sendNotJoinHelp(CommandSender sender){
+        String sb = "§a/Trade create §b<工会名> §c创建工会\n" +
+                "§a/Trade info §b<工会名> §c查看指定公会详情\n" +
+                "§a/Trade player §b<玩家名> §c查看这个玩家所在的公会详情\n" +
+                "§a/Trade join §b<工会名> §c请求进入工会\n" +
+                "§a/Trade tops <页数> §c查看工会排行";
+        sender.sendMessage(sb);
+    }
+
+    private void sendOwnerHelp(CommandSender sender){
+        String sb = "§a/Trade info §b<工会名> §c查看指定公会详情\n" +
+                "§a/Trade player §b<玩家名> §c查看这个玩家所在的公会详情\n" +
+                "§a/Trade kick §b<玩家名> §c将玩家从工会踢出\n" +
+                "§a/Trade accept §b<玩家名> §c同意玩家进入工会\n" +
+                "§a/Trade deny §b<玩家名> §c拒绝玩家进入工会\n" +
+                "§a/Trade tops <页数> §c查看工会排行\n" +
+                "§a/Trade bio <介绍> §c设置工会的介绍标语\n" +
+                "§4/Trade disable 解散自己的工会\n";
+        sender.sendMessage(sb);
+    }
+
+    //"create", "info", "player", "kick", "join", "leave", "disable", "accept", "deny", "tops", "bio"
+    public static class Tab implements TabCompleter {
+        List<String> empty = new ArrayList<>();
+        List<String> arg_1_joined = Arrays.asList("info <工会名> 查看指定公会详情", "player <玩家名> 查看这个玩家所在的公会详情", "leave <工会名> 离开工会", "tops <页数> 查看工会排行");
+        List<String> arg_1_noJoin = Arrays.asList("create <工会名> 创建工会", "info <工会名> 查看指定公会详情", "player <玩家名> 查看这个玩家所在的公会详情", "join <工会名> 请求进入工会", "tops <页数> 查看工会排行");
+        List<String> arg_1_owner = Arrays.asList("info <工会名> 查看指定公会详情", "player <玩家名> 查看这个玩家所在的公会详情", "kick <玩家名> 将玩家从工会踢出", "accept <玩家名> 同意玩家进入工会", "deny <玩家名> 拒绝玩家进入工会", "tops <页数> 查看工会排行", "bio <介绍> 设置工会的介绍标语");
+
+        @Override
+        public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args){
+            if (!(commandSender instanceof Player)) return empty;
+            Player player = (Player) commandSender;
+            Trade trade = TradeHelper.getPlayerEnterTrade(player);
+            if (args.length == 1) {
+                List<String> list = new ArrayList<>();
+                String arg_1 = args[0];
+                if (trade == null) {
+                    arg_1_noJoin.forEach(info -> {
+                        if (info.startsWith(arg_1)) list.add(info);
+                    });
+                    return list;
+                }
+                if (trade.getOwner().equals(player.getName())) {
+                    arg_1_owner.forEach(info -> {
+                        if (info.startsWith(arg_1)) list.add(info);
+                    });
+                    return list;
+                }
+                arg_1_joined.forEach(info -> {
+                    if (info.startsWith(arg_1)) list.add(info);
+                });
+                return list;
+
+            }
+            List<String> list = new ArrayList<>();
+            switch (args[0]) {
+                case "create":
+                    return Collections.singletonList("<工会名> 创建工会");
+                case "info":
+                    for (Trade t : TradeHelper.getList()) list.add(t.getName());
+                    return list;
+                case "player":
+                    for (Trade t : TradeHelper.getList()) {
+                        list.addAll(t.getMember().keySet());
+                    }
+                    return list;
+                case "kick":
+                    if (trade != null && trade.getOwner().equals(player.getName())) {
+                        list.addAll(trade.getMember().keySet());
+                        return list;
+                    }
+                    break;
+                case "join":
+                    if (trade == null) {
+                        for (Trade t : TradeHelper.getList()) {
+                            list.add(t.getName());
+                        }
+                        return list;
+                    }
+                    break;
+                case "leave":
+                    if (trade != null) {
+                        list.add(trade.getName());
+                        return list;
+                    }
+                    break;
+                case "accept":
+                case "deny":
+                    if (trade != null && trade.getOwner().equals(player.getName())) {
+                        list.addAll(trade.getRequest());
+                        return list;
+                    }
+                    break;
+            }
+
+
+            return empty;
+        }
+    }
 }

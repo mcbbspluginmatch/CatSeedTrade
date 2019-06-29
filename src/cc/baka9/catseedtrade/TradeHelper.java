@@ -51,23 +51,19 @@ public class TradeHelper {
     /**
      * 移除工会成员
      */
-    public static void removeTradeMember(Trade trade, Player player)
-            throws TradeNotHaveThisPlayerException, TradeOwnerException, PlayerNotHaveTradeException{
+    public static void removeTradeMember(Trade trade, Player player) throws TradeNotHaveThisPlayerException, TradeOwnerException{
         removeTradeMember(trade, player.getName());
     }
 
     /**
      * 移除工会成员
      */
-    public static void removeTradeMember(Trade trade, String playerName)
-            throws TradeNotHaveThisPlayerException, TradeOwnerException, PlayerNotHaveTradeException{
-        Trade enterTrade = getPlayerEnterTrade(playerName);
-        if (enterTrade == null)
-            throw new PlayerNotHaveTradeException(playerName);
-        if (enterTrade == trade) {
-            if (enterTrade.getOwner().equalsIgnoreCase(playerName)) {
-                throw new TradeOwnerException(playerName + " 是 " + trade.getName() + " 工会的主人,无法退出");
-            }
+    public static void removeTradeMember(Trade trade, String playerName) throws TradeNotHaveThisPlayerException, TradeOwnerException{
+        if (trade.getOwner().equalsIgnoreCase(playerName)) {
+            throw new TradeOwnerException(playerName + " 是 " + trade.getName() + " 工会的主人,无法移除");
+        }
+        Map<String, Double> member = trade.getMember();
+        if (member.containsKey(playerName)) {
             trade.getMember().remove(playerName);
         } else {
             throw new TradeNotHaveThisPlayerException(playerName + " 不在 " + trade.getName() + " 工会里");
@@ -177,9 +173,9 @@ public class TradeHelper {
     }
 
     public static Trade ownerDisableTrade(String playerName)
-            throws PlayerNotHaveTradeException, TradeOwnerNotThisPlayerException{
+            throws PlayerNotJoinTradeException, TradeOwnerNotThisPlayerException{
         Trade trade = getPlayerEnterTrade(playerName);
-        if (trade == null) throw new PlayerNotHaveTradeException(playerName);
+        if (trade == null) throw new PlayerNotJoinTradeException(playerName);
         if (!trade.getOwner().equalsIgnoreCase(playerName))
             throw new TradeOwnerNotThisPlayerException(playerName + " 不是 " + trade.getName() + " 工会的主人");
         list.remove(trade);
