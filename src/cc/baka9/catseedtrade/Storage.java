@@ -11,6 +11,7 @@ public class Storage {
     private static CatSeedTrade catSeedTrade = CatSeedTrade.getInstance();
 
     static{
+        // 可能造成数据损失 —— 754503921
         catSeedTrade.getServer().getScheduler().runTaskTimerAsynchronously(catSeedTrade, Storage::saveAll, 20L * 60, 20L * 60);
     }
 

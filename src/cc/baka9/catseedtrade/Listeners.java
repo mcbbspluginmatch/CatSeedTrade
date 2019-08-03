@@ -14,7 +14,7 @@ class Listeners implements Listener {
     @EventHandler
     public void onAsyncPlayerChat(AsyncPlayerChatEvent event){
         Player player = event.getPlayer();
-        Trade trade = TradeHelper.getPlayerEnterTrade(player);
+        Trade trade = TradeHelper.getPlayerEnterTrade(player); // 异步读取非线程安全容器 —— 754503921
         if (trade != null) {
             event.setFormat(event.getFormat().replace("%1$s", (trade.getOwner().equalsIgnoreCase(player.getName()) ? "§3[§6" + trade.getName() + "§3]§r" : "§7[§a" + trade.getName() + "§7]§r") + "%1$s"));
         }

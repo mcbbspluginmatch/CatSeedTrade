@@ -31,7 +31,7 @@ public class Notice {
     }
 
     public static void sendPlayerNotice(String playerName, String noticeMessage){
-        noticeMessage = noticeMessage.replace("&", "§");
+        noticeMessage = noticeMessage.replace("&", "§"); // 使用 ChatColor.translateAlternativeColorCode —— 754503921
         Player player = Bukkit.getPlayer(playerName);
         if (player != null && player.isOnline() && player.getName().equals(playerName)) {
             player.sendMessage(noticeMessage);

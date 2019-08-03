@@ -29,6 +29,8 @@ public class Commands implements CommandExecutor {
                             String tradeName = ChatColor.stripColor(args[1]);
                             if (tradeName.length() <= 8) {
 
+                                // 直接执行扣款操作并检测返回结果是否成功 —— 754503921
+
                                 if (CatSeedTrade.getEconomy().getBalance(player) < Config.createTradeMoney) {
                                     player.sendMessage("§e创建公会游戏币不足,需要游戏币" + Config.createTradeMoney);
                                     return true;
